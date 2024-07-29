@@ -19,3 +19,12 @@ button {
     font-size: 24px;
     margin-top: 20px;
 }
+
+.scores, .history {
+    margin-top: 30px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
