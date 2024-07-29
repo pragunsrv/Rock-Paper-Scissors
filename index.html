@@ -8,6 +8,14 @@
 </head>
 <body>
     <h1>Rock Paper Scissors</h1>
+    <div class="difficulty">
+        <label for="difficulty">Choose Difficulty:</label>
+        <select id="difficulty" onchange="setDifficulty()">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+    </div>
     <div class="buttons">
         <button onclick="play('rock')">Rock</button>
         <button onclick="play('paper')">Paper</button>
@@ -18,6 +26,7 @@
         <h2>Scores</h2>
         <p>Player: <span id="player-score">0</span></p>
         <p>Computer: <span id="computer-score">0</span></p>
+        <p>Ties: <span id="tie-score">0</span></p>
     </div>
     <div class="history">
         <h2>Game History</h2>

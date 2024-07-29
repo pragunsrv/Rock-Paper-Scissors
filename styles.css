@@ -4,11 +4,11 @@ body {
     margin-top: 50px;
 }
 
-.buttons {
+.buttons, .difficulty {
     margin: 20px;
 }
 
-button {
+button, select {
     font-size: 20px;
     padding: 10px 20px;
     margin: 10px;
