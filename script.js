@@ -5,62 +5,73 @@ let gamesPlayed = 0;
 let totalWins = 0;
 let totalLosses = 0;
 let maxRounds = 1;
+let numMoves = 3;
+let choices = ['rock', 'paper', 'scissors'];
 const history = Array(5).fill('-');
 const leaderboard = Array(5).fill({ name: 'No entries', score: 0 });
 const profiles = {};
 let difficulty = 'easy';
 let mode = 'single';
-const choices = ['rock', 'paper', 'scissors'];
+let customBackground = '#f0f0f0';
+let customText = '#000';
 
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    updateProfileSelect();
+    setProfile();
+    setGameSettings();
+    setTheme();
+});
+
+// Set difficulty level
 function setDifficulty() {
     difficulty = document.getElementById('difficulty').value;
 }
 
-function setTheme() {
-    const theme = document.getElementById('theme').value;
-    if (theme === 'custom') {
-        document.querySelector('.custom-theme').style.display = 'block';
-    } else {
-        document.querySelector('.custom-theme').style.display = 'none';
-        document.body.className = theme;
-    }
-}
-
-function applyCustomTheme() {
-    const backgroundColor = document.getElementById('custom-background').value;
-    const textColor = document.getElementById('custom-text').value;
-    document.documentElement.style.setProperty('--bg-color', backgroundColor);
-    document.documentElement.style.setProperty('--text-color', textColor);
-    document.body.className = 'custom';
-}
-
+// Set game mode (single or multiplayer)
 function setGameMode() {
     mode = document.getElementById('mode').value;
 }
 
-function addCustomChoice() {
-    const customChoice = document.getElementById('custom-choice').value.trim().toLowerCase();
-    if (customChoice && !choices.includes(customChoice)) {
-        choices.push(customChoice);
-    }
-    document.getElementById('custom-choice').value = '';
+// Set number of moves and choices
+function setGameSettings() {
+    numMoves = parseInt(document.getElementById('num-moves').value, 10);
+    choices = document.getElementById('move-names').value.split(',').map(choice => choice.trim());
+    if (choices.length < 3) choices = ['rock', 'paper', 'scissors']; // Default values
+    createMoveButtons();
 }
 
+// Create buttons for each move
+function createMoveButtons() {
+    const buttonsContainer = document.querySelector('.buttons');
+    buttonsContainer.innerHTML = '';
+    choices.forEach(choice => {
+        const button = document.createElement('button');
+        button.textContent = choice.charAt(0).toUpperCase() + choice.slice(1);
+        button.onclick = () => play(choice);
+        buttonsContainer.appendChild(button);
+    });
+}
+
+// Set profile to play with
 function setProfile() {
     const selectedProfile = document.getElementById('profile').value;
     if (profiles[selectedProfile]) {
-        playerScore = profiles[selectedProfile].playerScore;
-        computerScore = profiles[selectedProfile].computerScore;
-        tieScore = profiles[selectedProfile].tieScore;
-        gamesPlayed = profiles[selectedProfile].gamesPlayed;
-        totalWins = profiles[selectedProfile].totalWins;
-        totalLosses = profiles[selectedProfile].totalLosses;
+        const p = profiles[selectedProfile];
+        playerScore = p.playerScore;
+        computerScore = p.computerScore;
+        tieScore = p.tieScore;
+        gamesPlayed = p.gamesPlayed;
+        totalWins = p.totalWins;
+        totalLosses = p.totalLosses;
         updateScores();
         updateHistory();
         updateStatistics();
+        updateProfileStats();
     }
 }
 
+// Create new profile
 function createProfile() {
     const profileName = prompt("Enter profile name:");
     if (profileName && !profiles[profileName]) {
@@ -79,6 +90,7 @@ function createProfile() {
     }
 }
 
+// Edit an existing profile
 function editProfile() {
     const profileName = prompt("Enter profile name to edit:");
     if (profiles[profileName]) {
@@ -96,6 +108,7 @@ function editProfile() {
     }
 }
 
+// Delete an existing profile
 function deleteProfile() {
     const profileName = prompt("Enter profile name to delete:");
     if (profiles[profileName]) {
@@ -104,21 +117,14 @@ function deleteProfile() {
         if (Object.keys(profiles).length > 0) {
             setProfile();
         } else {
-            playerScore = 0;
-            computerScore = 0;
-            tieScore = 0;
-            gamesPlayed = 0;
-            totalWins = 0;
-            totalLosses = 0;
-            updateScores();
-            updateHistory();
-            updateStatistics();
+            resetGame();
         }
     } else {
         alert("Profile does not exist.");
     }
 }
 
+// Update profile select dropdown
 function updateProfileSelect() {
     const profileSelect = document.getElementById('profile');
     profileSelect.innerHTML = '';
@@ -133,12 +139,13 @@ function updateProfileSelect() {
     }
 }
 
+// Play a round of the game
 function play(playerChoice) {
     if (!choices.includes(playerChoice)) {
         alert("Invalid choice.");
         return;
     }
-    
+
     const computerChoice = choices[Math.floor(Math.random() * choices.length)];
     let result = '';
     
@@ -163,8 +170,12 @@ function play(playerChoice) {
     updateScores();
     updateHistory(playerChoice, computerChoice, result);
     updateStatistics();
+    if (mode === 'multiplayer') {
+        updateLeaderboard();
+    }
 }
 
+// Update scores display
 function updateScores() {
     document.getElementById('player-score').innerText = playerScore;
     document.getElementById('computer-score').innerText = computerScore;
@@ -174,12 +185,14 @@ function updateScores() {
     document.getElementById('total-losses').innerText = totalLosses;
 }
 
+// Update match history display
 function updateHistory(playerChoice = '', computerChoice = '', result = '') {
     history.pop();
     history.unshift(`Player: ${playerChoice} | Computer: ${computerChoice} | Result: ${result}`);
     document.getElementById('history').innerHTML = history.map((entry, index) => `<li>Game ${index + 1}: ${entry}</li>`).join('');
 }
 
+// Update statistics display
 function updateStatistics() {
     const avgScore = gamesPlayed > 0 ? playerScore / gamesPlayed : 0;
     const avgWins = gamesPlayed > 0 ? totalWins / gamesPlayed : 0;
@@ -190,6 +203,7 @@ function updateStatistics() {
     document.getElementById('avg-losses').innerText = avgLosses.toFixed(2);
 }
 
+// Export game statistics to CSV
 function exportStats() {
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += "Profile,Player Score,Computer Score,Ties,Games Played,Total Wins,Total Losses\n";
@@ -207,6 +221,7 @@ function exportStats() {
     document.body.removeChild(link);
 }
 
+// Reset the game state
 function resetGame() {
     playerScore = 0;
     computerScore = 0;
@@ -217,4 +232,66 @@ function resetGame() {
     updateScores();
     updateHistory();
     updateStatistics();
+    updateLeaderboard();
 }
+
+// Update profile statistics display
+function updateProfileStats() {
+    const selectedProfile = document.getElementById('profile').value;
+    if (profiles[selectedProfile]) {
+        const p = profiles[selectedProfile];
+        document.getElementById('profile-stats').innerText = `
+            Player Score: ${p.playerScore}
+            Computer Score: ${p.computerScore}
+            Ties: ${p.tieScore}
+            Games Played: ${p.gamesPlayed}
+            Total Wins: ${p.totalWins}
+            Total Losses: ${p.totalLosses}
+        `;
+    }
+}
+
+// Update leaderboard
+function updateLeaderboard() {
+    const leaderboardData = Object.keys(profiles).map(profile => {
+        const p = profiles[profile];
+        return {
+            name: profile,
+            score: p.totalWins - p.totalLosses
+        };
+    }).sort((a, b) => b.score - a.score).slice(0, 5);
+
+    for (let i = 0; i < 5; i++) {
+        document.getElementById('leaderboard').children[i].innerText = `${i + 1}. ${leaderboardData[i] ? `${leaderboardData[i].name} (${leaderboardData[i].score})` : 'No entries'}`;
+    }
+}
+
+// Set and apply selected theme
+function setTheme() {
+    const theme = document.getElementById('theme').value;
+    document.body.className = theme;
+    document.querySelector('.custom-theme').style.display = theme === 'custom' ? 'block' : 'none';
+}
+
+// Apply custom theme
+function applyCustomTheme() {
+    customBackground = document.getElementById('custom-background').value;
+    customText = document.getElementById('custom-text').value;
+    document.documentElement.style.setProperty('--bg-color', customBackground);
+    document.documentElement.style.setProperty('--text-color', customText);
+}
+
+// Initialize game settings and profiles
+function initializeGame() {
+    setDifficulty();
+    setGameMode();
+    setGameSettings();
+    updateProfileSelect();
+    updateScores();
+    updateHistory();
+    updateStatistics();
+    updateProfileStats();
+    updateLeaderboard();
+}
+
+initializeGame();

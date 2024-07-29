@@ -20,7 +20,7 @@ body {
     color: var(--text-color, #000);
 }
 
-.buttons, .difficulty, .custom-choices, .theme, .mode, .rounds, .profile {
+.buttons, .game-settings, .mode, .rounds, .profile, .profile-stats {
     margin: 20px;
 }
 
@@ -41,7 +41,7 @@ input {
     margin-top: 20px;
 }
 
-.scores, .leaderboard, .history, .statistics {
+.scores, .leaderboard, .history, .statistics, .profile-stats {
     margin-top: 30px;
 }
 
@@ -53,4 +53,11 @@ ul, ol {
 .custom-theme {
     display: none;
     margin: 20px;
+}
+
+@media (max-width: 600px) {
+    button, select, input {
+        font-size: 16px;
+        padding: 8px 16px;
+    }
 }

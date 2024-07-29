@@ -17,18 +17,17 @@
         <button onclick="editProfile()">Edit Profile</button>
         <button onclick="deleteProfile()">Delete Profile</button>
     </div>
-    <div class="difficulty">
+    <div class="game-settings">
         <label for="difficulty">Choose Difficulty:</label>
         <select id="difficulty" onchange="setDifficulty()">
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
         </select>
-    </div>
-    <div class="custom-choices">
-        <label for="custom-choice">Add Custom Choice:</label>
-        <input type="text" id="custom-choice" placeholder="Enter custom choice">
-        <button onclick="addCustomChoice()">Add Choice</button>
+        <label for="num-moves">Number of Moves:</label>
+        <input type="number" id="num-moves" min="3" value="3">
+        <label for="move-names">Move Names (comma-separated):</label>
+        <input type="text" id="move-names" placeholder="Rock, Paper, Scissors">
     </div>
     <div class="mode">
         <label for="mode">Game Mode:</label>
@@ -42,9 +41,7 @@
         <input type="number" id="rounds" min="1" value="1">
     </div>
     <div class="buttons">
-        <button onclick="play('rock')">Rock</button>
-        <button onclick="play('paper')">Paper</button>
-        <button onclick="play('scissors')">Scissors</button>
+        <!-- Buttons will be dynamically generated based on available moves -->
     </div>
     <p id="result"></p>
     <div class="scores">
@@ -61,6 +58,10 @@
         <p>Average Score per Game: <span id="avg-score">0</span></p>
         <p>Average Wins per Game: <span id="avg-wins">0</span></p>
         <p>Average Losses per Game: <span id="avg-losses">0</span></p>
+    </div>
+    <div class="profile-stats">
+        <h2>Profile Statistics</h2>
+        <p id="profile-stats">Select a profile to view statistics.</p>
     </div>
     <div class="leaderboard">
         <h2>Leaderboard</h2>
