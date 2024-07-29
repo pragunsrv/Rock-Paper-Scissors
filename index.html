@@ -14,6 +14,8 @@
             <!-- Profile options will be populated dynamically -->
         </select>
         <button onclick="createProfile()">Create New Profile</button>
+        <button onclick="editProfile()">Edit Profile</button>
+        <button onclick="deleteProfile()">Delete Profile</button>
     </div>
     <div class="difficulty">
         <label for="difficulty">Choose Difficulty:</label>
@@ -54,6 +56,12 @@
         <p>Wins: <span id="total-wins">0</span></p>
         <p>Losses: <span id="total-losses">0</span></p>
     </div>
+    <div class="statistics">
+        <h2>Game Statistics</h2>
+        <p>Average Score per Game: <span id="avg-score">0</span></p>
+        <p>Average Wins per Game: <span id="avg-wins">0</span></p>
+        <p>Average Losses per Game: <span id="avg-losses">0</span></p>
+    </div>
     <div class="leaderboard">
         <h2>Leaderboard</h2>
         <ol id="leaderboard">
@@ -80,8 +88,17 @@
         <select id="theme" onchange="setTheme()">
             <option value="light">Light Mode</option>
             <option value="dark">Dark Mode</option>
+            <option value="custom">Custom Theme</option>
         </select>
     </div>
+    <div class="custom-theme">
+        <label for="custom-background">Custom Background Color:</label>
+        <input type="color" id="custom-background">
+        <label for="custom-text">Custom Text Color:</label>
+        <input type="color" id="custom-text">
+        <button onclick="applyCustomTheme()">Apply Theme</button>
+    </div>
+    <button onclick="exportStats()">Export Stats</button>
     <script src="script.js"></script>
 </body>
 </html>

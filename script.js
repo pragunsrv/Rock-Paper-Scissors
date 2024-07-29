@@ -6,11 +6,11 @@ let totalWins = 0;
 let totalLosses = 0;
 let maxRounds = 1;
 const history = Array(5).fill('-');
-const leaderboard = Array(5).fill('No entries');
+const leaderboard = Array(5).fill({ name: 'No entries', score: 0 });
+const profiles = {};
 let difficulty = 'easy';
 let mode = 'single';
 const choices = ['rock', 'paper', 'scissors'];
-const profiles = {};
 
 function setDifficulty() {
     difficulty = document.getElementById('difficulty').value;
@@ -18,7 +18,20 @@ function setDifficulty() {
 
 function setTheme() {
     const theme = document.getElementById('theme').value;
-    document.body.className = theme;
+    if (theme === 'custom') {
+        document.querySelector('.custom-theme').style.display = 'block';
+    } else {
+        document.querySelector('.custom-theme').style.display = 'none';
+        document.body.className = theme;
+    }
+}
+
+function applyCustomTheme() {
+    const backgroundColor = document.getElementById('custom-background').value;
+    const textColor = document.getElementById('custom-text').value;
+    document.documentElement.style.setProperty('--bg-color', backgroundColor);
+    document.documentElement.style.setProperty('--text-color', textColor);
+    document.body.className = 'custom';
 }
 
 function setGameMode() {
@@ -44,6 +57,7 @@ function setProfile() {
         totalLosses = profiles[selectedProfile].totalLosses;
         updateScores();
         updateHistory();
+        updateStatistics();
     }
 }
 
@@ -58,82 +72,139 @@ function createProfile() {
             totalWins: 0,
             totalLosses: 0
         };
-        const profileSelect = document.getElementById('profile');
-        const option = document.createElement('option');
-        option.value = profileName;
-        option.text = profileName;
-        profileSelect.add(option);
-        profileSelect.value = profileName;
+        updateProfileSelect();
         setProfile();
     } else if (profileName) {
         alert("Profile already exists.");
     }
 }
 
+function editProfile() {
+    const profileName = prompt("Enter profile name to edit:");
+    if (profiles[profileName]) {
+        const newName = prompt("Enter new profile name:");
+        if (newName && !profiles[newName]) {
+            profiles[newName] = profiles[profileName];
+            delete profiles[profileName];
+            updateProfileSelect();
+            setProfile();
+        } else if (newName) {
+            alert("Profile already exists or invalid name.");
+        }
+    } else {
+        alert("Profile does not exist.");
+    }
+}
+
+function deleteProfile() {
+    const profileName = prompt("Enter profile name to delete:");
+    if (profiles[profileName]) {
+        delete profiles[profileName];
+        updateProfileSelect();
+        if (Object.keys(profiles).length > 0) {
+            setProfile();
+        } else {
+            playerScore = 0;
+            computerScore = 0;
+            tieScore = 0;
+            gamesPlayed = 0;
+            totalWins = 0;
+            totalLosses = 0;
+            updateScores();
+            updateHistory();
+            updateStatistics();
+        }
+    } else {
+        alert("Profile does not exist.");
+    }
+}
+
+function updateProfileSelect() {
+    const profileSelect = document.getElementById('profile');
+    profileSelect.innerHTML = '';
+    Object.keys(profiles).forEach(profile => {
+        const option = document.createElement('option');
+        option.value = profile;
+        option.textContent = profile;
+        profileSelect.appendChild(option);
+    });
+    if (Object.keys(profiles).length === 0) {
+        profileSelect.innerHTML = '<option>No profiles</option>';
+    }
+}
+
 function play(playerChoice) {
-    if (gamesPlayed >= maxRounds) {
-        document.getElementById('result').innerText = "Game over! Please reset to start a new game.";
+    if (!choices.includes(playerChoice)) {
+        alert("Invalid choice.");
         return;
     }
-    let opponentChoice;
-    if (mode === 'single') {
-        opponentChoice = getComputerChoice();
-    } else {
-        opponentChoice = prompt("Player 2, enter your choice (rock, paper, scissors):").toLowerCase();
-        if (!choices.includes(opponentChoice)) {
-            alert("Invalid choice by Player 2. Please choose rock, paper, or scissors.");
-            return;
-        }
-    }
-    const result = getResult(playerChoice, opponentChoice);
-    updateScores(result);
-    updateHistory(playerChoice, opponentChoice, result);
-    updateLeaderboard();
-    gamesPlayed++;
-    document.getElementById('games-played').innerText = gamesPlayed;
-}
-
-function getComputerChoice() {
-    const randomIndex = Math.floor(Math.random() * choices.length);
-    return choices[randomIndex];
-}
-
-function getResult(playerChoice, opponentChoice) {
-    if (playerChoice === opponentChoice) {
+    
+    const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+    let result = '';
+    
+    if (playerChoice === computerChoice) {
+        result = 'Tie';
         tieScore++;
-        return "It's a tie!";
-    }
-    if (
-        (playerChoice === 'rock' && opponentChoice === 'scissors') ||
-        (playerChoice === 'paper' && opponentChoice === 'rock') ||
-        (playerChoice === 'scissors' && opponentChoice === 'paper')
+    } else if (
+        (playerChoice === 'rock' && computerChoice === 'scissors') ||
+        (playerChoice === 'paper' && computerChoice === 'rock') ||
+        (playerChoice === 'scissors' && computerChoice === 'paper')
     ) {
+        result = 'Player Wins';
         playerScore++;
         totalWins++;
-        return "You win!";
+    } else {
+        result = 'Computer Wins';
+        computerScore++;
+        totalLosses++;
     }
-    computerScore++;
-    totalLosses++;
-    return "You lose!";
+    
+    gamesPlayed++;
+    updateScores();
+    updateHistory(playerChoice, computerChoice, result);
+    updateStatistics();
 }
 
-function updateScores(result) {
+function updateScores() {
     document.getElementById('player-score').innerText = playerScore;
     document.getElementById('computer-score').innerText = computerScore;
     document.getElementById('tie-score').innerText = tieScore;
+    document.getElementById('games-played').innerText = gamesPlayed;
     document.getElementById('total-wins').innerText = totalWins;
     document.getElementById('total-losses').innerText = totalLosses;
 }
 
-function updateHistory(playerChoice, opponentChoice, result) {
+function updateHistory(playerChoice = '', computerChoice = '', result = '') {
     history.pop();
-    history.unshift(`Player: ${playerChoice} | Computer: ${opponentChoice} | Result: ${result}`);
+    history.unshift(`Player: ${playerChoice} | Computer: ${computerChoice} | Result: ${result}`);
     document.getElementById('history').innerHTML = history.map((entry, index) => `<li>Game ${index + 1}: ${entry}</li>`).join('');
 }
 
-function updateLeaderboard() {
-    leaderboard.sort((a, b) => b.score - a.score);
-    document.getElementById('leaderboard').innerHTML = leaderboard.map((entry, index) => `<li>${index + 1}. ${entry.name} - ${entry.score}</li>`).join('');
+function updateStatistics() {
+    const avgScore = gamesPlayed > 0 ? playerScore / gamesPlayed : 0;
+    const avgWins = gamesPlayed > 0 ? totalWins / gamesPlayed : 0;
+    const avgLosses = gamesPlayed > 0 ? totalLosses / gamesPlayed : 0;
+    
+    document.getElementById('avg-score').innerText = avgScore.toFixed(2);
+    document.getElementById('avg-wins').innerText = avgWins.toFixed(2);
+    document.getElementById('avg-losses').innerText = avgLosses.toFixed(2);
+}
+
+function exportStats() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Profile,Player Score,Computer Score,Ties,Games Played,Total Wins,Total Losses\n";
+    Object.keys(profiles).forEach(profile => {
+        const p = profiles[profile];
+        csvContent += `${profile},${p.playerScore},${p.computerScore},${p.tieScore},${p.gamesPlayed},${p.totalWins},${p.totalLosses}\n`;
+    });
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "game_statistics.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 function resetGame() {
@@ -143,11 +214,7 @@ function resetGame() {
     gamesPlayed = 0;
     totalWins = 0;
     totalLosses = 0;
-    document.getElementById('player-score').innerText = playerScore;
-    document.getElementById('computer-score').innerText = computerScore;
-    document.getElementById('tie-score').innerText = tieScore;
-    document.getElementById('games-played').innerText = gamesPlayed;
-    document.getElementById('total-wins').innerText = totalWins;
-    document.getElementById('total-losses').innerText = totalLosses;
-    updateHistory('', '', '');
+    updateScores();
+    updateHistory();
+    updateStatistics();
 }
