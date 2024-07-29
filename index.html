@@ -16,6 +16,11 @@
             <option value="hard">Hard</option>
         </select>
     </div>
+    <div class="custom-choices">
+        <label for="custom-choice">Add Custom Choice:</label>
+        <input type="text" id="custom-choice" placeholder="Enter custom choice">
+        <button onclick="addCustomChoice()">Add Choice</button>
+    </div>
     <div class="buttons">
         <button onclick="play('rock')">Rock</button>
         <button onclick="play('paper')">Paper</button>
@@ -28,6 +33,16 @@
         <p>Computer: <span id="computer-score">0</span></p>
         <p>Ties: <span id="tie-score">0</span></p>
     </div>
+    <div class="leaderboard">
+        <h2>Leaderboard</h2>
+        <ol id="leaderboard">
+            <li>1. No entries</li>
+            <li>2. No entries</li>
+            <li>3. No entries</li>
+            <li>4. No entries</li>
+            <li>5. No entries</li>
+        </ol>
+    </div>
     <div class="history">
         <h2>Game History</h2>
         <ul id="history">
@@ -39,6 +54,13 @@
         </ul>
     </div>
     <button onclick="resetGame()">Reset Game</button>
+    <div class="theme">
+        <label for="theme">Choose Theme:</label>
+        <select id="theme" onchange="setTheme()">
+            <option value="light">Light Mode</option>
+            <option value="dark">Dark Mode</option>
+        </select>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
