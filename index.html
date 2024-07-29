@@ -8,6 +8,13 @@
 </head>
 <body>
     <h1>Rock Paper Scissors</h1>
+    <div class="profile">
+        <label for="profile">Select Profile:</label>
+        <select id="profile" onchange="setProfile()">
+            <!-- Profile options will be populated dynamically -->
+        </select>
+        <button onclick="createProfile()">Create New Profile</button>
+    </div>
     <div class="difficulty">
         <label for="difficulty">Choose Difficulty:</label>
         <select id="difficulty" onchange="setDifficulty()">
@@ -27,6 +34,10 @@
             <option value="single">Single Player</option>
             <option value="multiplayer">Multiplayer</option>
         </select>
+    </div>
+    <div class="rounds">
+        <label for="rounds">Max Rounds:</label>
+        <input type="number" id="rounds" min="1" value="1">
     </div>
     <div class="buttons">
         <button onclick="play('rock')">Rock</button>
@@ -54,7 +65,7 @@
         </ol>
     </div>
     <div class="history">
-        <h2>Game History</h2>
+        <h2>Match History</h2>
         <ul id="history">
             <li>Game 1: -</li>
             <li>Game 2: -</li>
@@ -62,10 +73,6 @@
             <li>Game 4: -</li>
             <li>Game 5: -</li>
         </ul>
-    </div>
-    <div class="rounds">
-        <label for="rounds">Max Rounds:</label>
-        <input type="number" id="rounds" min="1" value="1">
     </div>
     <button onclick="resetGame()">Reset Game</button>
     <div class="theme">

@@ -4,11 +4,13 @@ let tieScore = 0;
 let gamesPlayed = 0;
 let totalWins = 0;
 let totalLosses = 0;
+let maxRounds = 1;
 const history = Array(5).fill('-');
 const leaderboard = Array(5).fill('No entries');
 let difficulty = 'easy';
 let mode = 'single';
 const choices = ['rock', 'paper', 'scissors'];
+const profiles = {};
 
 function setDifficulty() {
     difficulty = document.getElementById('difficulty').value;
@@ -31,22 +33,61 @@ function addCustomChoice() {
     document.getElementById('custom-choice').value = '';
 }
 
+function setProfile() {
+    const selectedProfile = document.getElementById('profile').value;
+    if (profiles[selectedProfile]) {
+        playerScore = profiles[selectedProfile].playerScore;
+        computerScore = profiles[selectedProfile].computerScore;
+        tieScore = profiles[selectedProfile].tieScore;
+        gamesPlayed = profiles[selectedProfile].gamesPlayed;
+        totalWins = profiles[selectedProfile].totalWins;
+        totalLosses = profiles[selectedProfile].totalLosses;
+        updateScores();
+        updateHistory();
+    }
+}
+
+function createProfile() {
+    const profileName = prompt("Enter profile name:");
+    if (profileName && !profiles[profileName]) {
+        profiles[profileName] = {
+            playerScore: 0,
+            computerScore: 0,
+            tieScore: 0,
+            gamesPlayed: 0,
+            totalWins: 0,
+            totalLosses: 0
+        };
+        const profileSelect = document.getElementById('profile');
+        const option = document.createElement('option');
+        option.value = profileName;
+        option.text = profileName;
+        profileSelect.add(option);
+        profileSelect.value = profileName;
+        setProfile();
+    } else if (profileName) {
+        alert("Profile already exists.");
+    }
+}
+
 function play(playerChoice) {
+    if (gamesPlayed >= maxRounds) {
+        document.getElementById('result').innerText = "Game over! Please reset to start a new game.";
+        return;
+    }
+    let opponentChoice;
     if (mode === 'single') {
-        const computerChoice = getComputerChoice();
-        const result = getResult(playerChoice, computerChoice);
-        updateScores(result);
+        opponentChoice = getComputerChoice();
     } else {
-        // Multiplayer mode: Prompt the second player for their choice
-        const computerChoice = prompt("Player 2, enter your choice (rock, paper, scissors):").toLowerCase();
-        if (choices.includes(computerChoice)) {
-            const result = getResult(playerChoice, computerChoice);
-            updateScores(result);
-        } else {
+        opponentChoice = prompt("Player 2, enter your choice (rock, paper, scissors):").toLowerCase();
+        if (!choices.includes(opponentChoice)) {
             alert("Invalid choice by Player 2. Please choose rock, paper, or scissors.");
+            return;
         }
     }
-    updateHistory(playerChoice, mode === 'single' ? getComputerChoice() : computerChoice, result);
+    const result = getResult(playerChoice, opponentChoice);
+    updateScores(result);
+    updateHistory(playerChoice, opponentChoice, result);
     updateLeaderboard();
     gamesPlayed++;
     document.getElementById('games-played').innerText = gamesPlayed;
@@ -85,22 +126,14 @@ function updateScores(result) {
 }
 
 function updateHistory(playerChoice, opponentChoice, result) {
-    const timestamp = new Date().toLocaleTimeString();
     history.pop();
-    history.unshift(`(${timestamp}) You chose ${playerChoice}, Opponent chose ${opponentChoice}: ${result}`);
-    const historyList = document.getElementById('history');
-    historyList.innerHTML = history.map((entry, index) => `<li>Game ${index + 1}: ${entry}</li>`).join('');
+    history.unshift(`Player: ${playerChoice} | Computer: ${opponentChoice} | Result: ${result}`);
+    document.getElementById('history').innerHTML = history.map((entry, index) => `<li>Game ${index + 1}: ${entry}</li>`).join('');
 }
 
 function updateLeaderboard() {
-    const scores = leaderboard.map(entry => parseInt(entry.split(':')[0], 10) || 0);
-    scores.push(playerScore);
-    scores.sort((a, b) => b - a);
-    scores.length = 5; // Limit to top 5
-    leaderboard.length = 5;
-    leaderboard.forEach((_, index) => {
-        document.getElementById('leaderboard').children[index].innerText = `${index + 1}. ${scores[index]} wins`;
-    });
+    leaderboard.sort((a, b) => b.score - a.score);
+    document.getElementById('leaderboard').innerHTML = leaderboard.map((entry, index) => `<li>${index + 1}. ${entry.name} - ${entry.score}</li>`).join('');
 }
 
 function resetGame() {
@@ -110,7 +143,6 @@ function resetGame() {
     gamesPlayed = 0;
     totalWins = 0;
     totalLosses = 0;
-    history.fill('-');
     document.getElementById('player-score').innerText = playerScore;
     document.getElementById('computer-score').innerText = computerScore;
     document.getElementById('tie-score').innerText = tieScore;
